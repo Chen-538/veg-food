@@ -147,16 +147,12 @@
 
   <script>
   // ---------- Data generator (audited & constrained for correctness) ----------
-  // 僅使用真實可取得的食材，並依料理類型限制風味搭配，避免不合理組合。
+  // 僅使用真實可取得的食材，並依料理類型限制風味搭配，且把「風味必備食材」加進食材清單。
   const VEG = [
     "青江菜","高麗菜","綠花椰菜","白花椰菜","菠菜","空心菜","地瓜葉","小白菜","娃娃菜",
     "四季豆","蘆筍","秋葵","紅蘿蔔","白蘿蔔","馬鈴薯","南瓜","番茄","彩椒","玉米筍",
     "香菇","杏鮑菇","秀珍菇","金針菇","鴻喜菇","黑木耳","海帶芽","牛蒡","茄子","洋蔥",
     "豆芽菜","豆苗","萵苣","小番茄","小黃瓜","韭菜","蓮藕"
-  ];
-  const PRO_ALL = [
-    "板豆腐","嫩豆腐","豆干","油豆腐","百頁豆腐","豆皮","麵腸(素雞)","素丸",
-    "鷹嘴豆","毛豆","黑豆","紅腰豆","天貝"
   ];
   const PRO_BY_TYPE = {
     "快炒":["板豆腐","豆干","油豆腐","百頁豆腐","麵腸(素雞)","毛豆"],
@@ -188,6 +184,23 @@
     "咖哩":"先炒香再加水煮至濃稠。",
     "青醬":"避免加熱過久以保翠綠。"
   };
+  // 風味對應「必備食材」，確保卡片食材含有標題中的風味詞
+  const FLAVOR_ING_MAP = {
+    "九層塔":["九層塔"],
+    "番茄羅勒":["番茄","羅勒"],
+    "青醬":["青醬"],
+    "胡麻":["胡麻醬"],
+    "檸檬胡椒":["檸檬"],
+    "宮保(素)":["乾辣椒","花生"],
+    "三杯":["米酒","糖"], // 醬油另外附
+    "豆豉":["豆豉"],
+    "味噌":["味噌"],
+    "咖哩":["咖哩塊/粉"],
+    "麻辣":["辣油"],
+    "黑胡椒":["黑胡椒"],
+    "鹽麴":["鹽麴"],
+    "糖醋":["白醋","糖"]
+  };
   const FLAVOR_BY_TYPE = {
     "快炒":["蒜香","九層塔","黑胡椒","三杯","宮保(素)","豆豉","麻辣","鹽麴","糖醋"],
     "湯品":["味噌","清燉","番茄羅勒","咖哩"],
@@ -218,7 +231,14 @@
     const c = type==="飯麵" ? pick(CARB) : null;
 
     const title = `${flName}${v1}${p?`＋${p}`:(v2?`＋${v2}`:``)}${type==='飯麵'&&c?`｜${c}`:``}`;
-    const ings = [v1, v2, p, c, "蒜末","醬油","鹽","植物油"].filter(Boolean).slice(0,7);
+
+    // 基本食材 + 風味必備食材（確保九層塔/番茄羅勒等會出現在 chips）
+    let base = [v1, v2, p, c, ...(FLAVOR_ING_MAP[flName]||[]), "蒜末","醬油","鹽","植物油"];
+    // 番茄羅勒：若 v1 不是番茄，仍需加入番茄
+    if(flName==="番茄羅勒" && !base.includes("番茄")) base.push("番茄");
+    if(flName==="九層塔" && !base.includes("九層塔")) base.push("九層塔");
+
+    const ings = [...new Set(base.filter(Boolean))].slice(0,8);
     const note = `${FLAVORS[flName]} ${TYPE_NOTES[type]}`.trim();
     const timeMap = {"快炒":[10,15],"湯品":[20,30],"沙拉":[6,10],"飯麵":[15,25],"烤焗":[15,25],"小食":[10,15]};
     const t = timeMap[type];
@@ -237,15 +257,7 @@
 
   function cardTemplate(r){
     const tags = r.ings.map(i=>`<span class=\"tag\">${i}</span>`).join('');
-    return `<article class=\"card\" data-id=\"${r.id}\" data-type=\"${r.type}\">
-      <span class=\"badge\">${r.type}</span>
-      <h3>${r.title}</h3>
-      <div class=\"meta\">${tags}</div>
-      <div class=\"note\">⚑ ${r.note}</div>
-      <div class=\"actions\">
-        <button class=\"btn ghost btn-detail\">看做法/注意</button>
-      </div>
-    </article>`
+    return `<article class=\"card\" data-id=\"${r.id}\" data-type=\"${r.type}\">\n      <span class=\"badge\">${r.type}</span>\n      <h3>${r.title}</h3>\n      <div class=\"meta\">${tags}</div>\n      <div class=\"note\">⚑ ${r.note}</div>\n      <div class=\"actions\">\n        <button class=\"btn ghost btn-detail\">看做法/注意</button>\n      </div>\n    </article>`
   }
 
   function render(list){
