@@ -146,58 +146,89 @@
   </div>
 
   <script>
-  // ---------- Data generator (200 vegetarian recipes) ----------
-  const VEG = ["青花菜","高麗菜","空心菜","青江菜","菠菜","地瓜葉","小白菜","娃娃菜","四季豆","蘆筍","秋葵","紅蘿蔔","馬鈴薯","南瓜","番茄","彩椒","甜椒","玉米筍","高山高麗菜","香菇","杏鮑菇","秀珍菇","金針菇","鴻喜菇","黑木耳","海帶芽","牛蒡","花椰菜","茄子","洋蔥","白花椰","豆芽菜","豆苗","空氣蔬菜","萵苣","綠竹筍","小番茄","胡瓜","黃瓜","山藥"];
-  const PRO = ["板豆腐","嫩豆腐","豆干","油豆腐","百頁豆腐","豆皮","素雞","素火腿","素丸","鷹嘴豆","毛豆","黑豆","紅腰豆"]; 
-  const CARB = ["白飯","糙米飯","藜麥飯","豆腐麵","烏龍麵","拉麵","義大利麵","筆管麵","河粉","細粉","年糕","吐司","玉米餅"];
-  const FLAVOR = [
-    {name:"蒜香", note:"先爆香蒜末再下菜，火不要太大避免焦苦。"},
-    {name:"麻油薑", note:"麻油最後拌入，避免高溫久炒產生苦味。"},
-    {name:"九層塔", note:"九層塔起鍋前再放，香氣最足。"},
-    {name:"味噌", note:"味噌不要久煮，關火後調入以保留風味。"},
-    {name:"黑胡椒", note:"胡椒現磨最香，鹽量可先少後補。"},
-    {name:"三杯", note:"醬油米酒糖 1:1:1，小火收汁別太鹹。"},
-    {name:"宮保(素)", note:"乾辣椒先炒香，花生最後拌脆。"},
-    {name:"泰式酸辣", note:"檸檬汁關火後加入，保持清新酸度。"},
-    {name:"胡麻", note:"胡麻醬用溫水稀釋，口感更滑順。"},
-    {name:"咖哩", note:"先炒香咖哩塊或粉，再加水煮至濃稠。"},
-    {name:"番茄羅勒", note:"番茄酸度高，適量加糖平衡口感。"},
-    {name:"青醬", note:"青醬避免加熱過久，保持翠綠。"},
-    {name:"豆豉", note:"豆豉鹹度高，先沖一下再入鍋。"},
-    {name:"檸檬胡椒", note:"檸檬皮屑提香，用量少即可。"},
-    {name:"清燉", note:"保持小火，蔬菜軟而不糊即可。"},
-    {name:"涼拌", note:"菜先冰鎮瀝乾，醬汁比例 1:1:1（酸甜鹹）。"},
-    {name:"麻辣", note:"辣油少量多次，先試辣度再加。"},
-    {name:"鹽麴", note:"鹽麴先抹 10 分鐘，更鮮更嫩。"},
-    {name:"糖醋", note:"醋最後下，收汁到微濃即可。"}
+  // ---------- Data generator (audited & constrained for correctness) ----------
+  // 僅使用真實可取得的食材，並依料理類型限制風味搭配，避免不合理組合。
+  const VEG = [
+    "青江菜","高麗菜","綠花椰菜","白花椰菜","菠菜","空心菜","地瓜葉","小白菜","娃娃菜",
+    "四季豆","蘆筍","秋葵","紅蘿蔔","白蘿蔔","馬鈴薯","南瓜","番茄","彩椒","玉米筍",
+    "香菇","杏鮑菇","秀珍菇","金針菇","鴻喜菇","黑木耳","海帶芽","牛蒡","茄子","洋蔥",
+    "豆芽菜","豆苗","萵苣","小番茄","小黃瓜","韭菜","蓮藕"
   ];
-  const TYPES = ["快炒","湯品","沙拉","飯麵","烤焗","小食"];
+  const PRO_ALL = [
+    "板豆腐","嫩豆腐","豆干","油豆腐","百頁豆腐","豆皮","麵腸(素雞)","素丸",
+    "鷹嘴豆","毛豆","黑豆","紅腰豆","天貝"
+  ];
+  const PRO_BY_TYPE = {
+    "快炒":["板豆腐","豆干","油豆腐","百頁豆腐","麵腸(素雞)","毛豆"],
+    "湯品":["嫩豆腐","板豆腐","素丸","紅腰豆"],
+    "沙拉":["嫩豆腐","豆皮","鷹嘴豆","毛豆"],
+    "飯麵":["板豆腐","百頁豆腐","麵腸(素雞)","天貝"],
+    "烤焗":["板豆腐","天貝","麵腸(素雞)"],
+    "小食":["豆干","百頁豆腐","麵腸(素雞)","毛豆"]
+  };
+  const CARB = ["白飯","糙米飯","藜麥飯","烏龍麵","拉麵","義大利麵","筆管麵","河粉","米粉","冬粉","年糕","吐司","玉米餅","蕎麥麵","豆腐麵"];
 
-  // helper pickers
+  const FLAVORS = {
+    "蒜香":"先爆香蒜末再下菜，避免焦苦。",
+    "麻油薑":"麻油最後拌入，香更足。",
+    "九層塔":"起鍋前再放，保香氣。",
+    "黑胡椒":"現磨最香，鹽量先少後補。",
+    "三杯":"醬油米酒糖 1:1:1，小火收汁。",
+    "宮保(素)":"乾辣椒先炒香，花生最後拌。",
+    "豆豉":"先沖一下去多餘鹹味。",
+    "麻辣":"辣油少量多次，先試辣度。",
+    "鹽麴":"抹 10 分鐘更鮮嫩。",
+    "糖醋":"醋最後下，微濃即可。",
+    "胡麻":"用溫水稀釋更滑順。",
+    "檸檬胡椒":"加點檸檬皮屑更清香。",
+    "涼拌":"蔬菜冰鎮瀝乾再拌。",
+    "味噌":"味噌關火後調入，別久煮。",
+    "清燉":"小火慢燉，蔬菜軟而不糊。",
+    "番茄羅勒":"酸度高可少許糖平衡。",
+    "咖哩":"先炒香再加水煮至濃稠。",
+    "青醬":"避免加熱過久以保翠綠。"
+  };
+  const FLAVOR_BY_TYPE = {
+    "快炒":["蒜香","九層塔","黑胡椒","三杯","宮保(素)","豆豉","麻辣","鹽麴","糖醋"],
+    "湯品":["味噌","清燉","番茄羅勒","咖哩"],
+    "沙拉":["胡麻","檸檬胡椒","涼拌"],
+    "飯麵":["咖哩","番茄羅勒","青醬","黑胡椒","胡麻"],
+    "烤焗":["黑胡椒","檸檬胡椒","青醬","番茄羅勒","咖哩","鹽麴"],
+    "小食":["蒜香","胡麻","糖醋","黑胡椒","鹽麴"]
+  };
+  const TYPES = ["快炒","湯品","沙拉","飯麵","烤焗","小食"];
+  const TYPE_NOTES = {
+    "快炒":"大火快炒 2–4 分鐘，保脆。",
+    "湯品":"湯滾後轉小火，蔬菜軟即可。",
+    "沙拉":"瀝乾水分再拌，味道更進。",
+    "飯麵":"醬汁收至附著即可。",
+    "烤焗":"180–200°C 8–15 分鐘，表面微焦即可。",
+    "小食":"小火慢煎或氣炸，外酥內嫩。"
+  };
+
   const pick = (arr)=> arr[Math.floor(Math.random()*arr.length)];
+  const rr = (min,max)=> Math.floor(Math.random()*(max-min+1))+min;
   let idSeed = 1;
   function makeRecipe(){
     const type = pick(TYPES);
-    const v1 = pick(VEG), v2 = Math.random()>.6 ? pick(VEG) : null;
-    const p = Math.random()>.55 ? pick(PRO) : null;
+    const flName = pick(FLAVOR_BY_TYPE[type]);
+    const v1 = pick(VEG);
+    let v2 = Math.random()>.65 ? pick(VEG) : null; if(v2===v1) v2 = null;
+    let p = Math.random()>.55 ? pick(PRO_BY_TYPE[type]) : null;
     const c = type==="飯麵" ? pick(CARB) : null;
-    const fl = pick(FLAVOR);
-    const tName = `${fl.name}${v1}${p?`·${p}`: (v2?`·${v2}`:"")}${type==='飯麵'&&c?` ${c}`:""}`;
-    const ings = [v1, v2, p, c, "蒜末", "醬油", "鹽", "油"].filter(Boolean).slice(0,6);
-    const note = [
-      fl.note,
-      "蔬菜別過熟，保留脆度。",
-      "少油少鹽，口味可再調整。",
-      "全素可：改用植物奶/植物油。",
-      "蛋奶素：可加起司或奶油提味。"
-    ][Math.floor(Math.random()*5)];
-    return {id:idSeed++, title:tName, type, ings, note, diet: Math.random()>.2?"全素":"蛋奶素", time: `${15+Math.floor(Math.random()*15)} 分鐘`};
+
+    const title = `${flName}${v1}${p?`＋${p}`:(v2?`＋${v2}`:``)}${type==='飯麵'&&c?`｜${c}`:``}`;
+    const ings = [v1, v2, p, c, "蒜末","醬油","鹽","植物油"].filter(Boolean).slice(0,7);
+    const note = `${FLAVORS[flName]} ${TYPE_NOTES[type]}`.trim();
+    const timeMap = {"快炒":[10,15],"湯品":[20,30],"沙拉":[6,10],"飯麵":[15,25],"烤焗":[15,25],"小食":[10,15]};
+    const t = timeMap[type];
+    return {id:idSeed++, title, type, ings, note, diet:"全素", time:`${rr(t[0],t[1])} 分鐘`};
   }
 
-  // generate 200 unique-ish recipes
-  const RECIPES = Array.from({length: 200}, makeRecipe);
+  // 產生 200 道不重複標題的食譜
+  const RECIPES = (()=>{ const set=new Set(), out=[]; let guard=0; while(out.length<200 && guard<5000){ const r=makeRecipe(); if(!set.has(r.title)){ set.add(r.title); out.push(r);} guard++; } return out; })();
 
-  // ---------- Render ----------
+  // ---------- Render (unchanged) ----------
   const grid = document.getElementById('grid');
   const overlay = document.getElementById('overlay');
   const q = document.getElementById('q');
@@ -205,14 +236,14 @@
   let currentType = '全部';
 
   function cardTemplate(r){
-    const tags = r.ings.map(i=>`<span class="tag">${i}</span>`).join('');
-    return `<article class="card" data-id="${r.id}" data-type="${r.type}">
-      <span class="badge">${r.type}</span>
+    const tags = r.ings.map(i=>`<span class=\"tag\">${i}</span>`).join('');
+    return `<article class=\"card\" data-id=\"${r.id}\" data-type=\"${r.type}\">
+      <span class=\"badge\">${r.type}</span>
       <h3>${r.title}</h3>
-      <div class="meta">${tags}</div>
-      <div class="note">⚑ ${r.note}</div>
-      <div class="actions">
-        <button class="btn ghost btn-detail">看做法/注意</button>
+      <div class=\"meta\">${tags}</div>
+      <div class=\"note\">⚑ ${r.note}</div>
+      <div class=\"actions\">
+        <button class=\"btn ghost btn-detail\">看做法/注意</button>
       </div>
     </article>`
   }
@@ -231,7 +262,6 @@
     document.querySelectorAll('.btn-detail').forEach(btn=>btn.addEventListener('click', openDetail));
   }
 
-  // initial render (first 24 to讓版面輕)
   let showingAll = false;
   function listByState(){
     const kw = q.value.trim();
@@ -241,7 +271,6 @@
   }
   render(listByState());
 
-  // Controls
   document.getElementById('btn-all').addEventListener('click',()=>{
     showingAll = !showingAll;
     document.getElementById('btn-all').textContent = showingAll? '📚 收合到精選' : '📚 瀏覽全部';
@@ -261,7 +290,6 @@
 
   q.addEventListener('input',()=> render(listByState()));
 
-  // Random recommend + playful animation
   const btnRandom = document.getElementById('btn-random');
   btnRandom.addEventListener('click',()=>{
     btnRandom.classList.add('shake');
@@ -271,7 +299,6 @@
     showDetail(pickOne);
   });
 
-  // ---------- Detail Modal ----------
   function openDetail(e){
     const id = +e.target.closest('.card').dataset.id;
     const r = RECIPES.find(x=>x.id===id);
@@ -282,15 +309,13 @@
     document.getElementById('detail-type').textContent = `${r.type}`;
     document.getElementById('level-pill').textContent = `⏱️ ${r.time}`;
     document.getElementById('diet-pill').textContent = r.diet==='全素'? '🥗 全素可' : '🥚 蛋奶素';
-    document.getElementById('ing').innerHTML = r.ings.map(i=>`<div class="pill">🛒 ${i}</div>`).join('');
+    document.getElementById('ing').innerHTML = r.ings.map(i=>`<div class=\"pill\">🛒 ${i}</div>`).join('');
     document.getElementById('note').textContent = r.note;
     overlay.classList.add('show');
     overlay.setAttribute('aria-hidden','false');
   }
   document.getElementById('close').addEventListener('click',()=>{overlay.classList.remove('show');overlay.setAttribute('aria-hidden','true')});
   overlay.addEventListener('click',e=>{ if(e.target===overlay){overlay.classList.remove('show');overlay.setAttribute('aria-hidden','true')} });
-
-  // Keyboard esc to close
   window.addEventListener('keydown',e=>{ if(e.key==='Escape'){ overlay.classList.remove('show');overlay.setAttribute('aria-hidden','true') } });
   </script>
 </body>
