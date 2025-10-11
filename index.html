@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>蔬菜食譜 200 | 想不到要吃什麼嗎？</title>
+  <title>蔬菜食譜 200 | 想不到要吃什麼嗎？（無蒜版）</title>
   <style>
     :root{
       --bg:#fbfbf9;--ink:#1f2937;--muted:#6b7280;--paper:#ffffff;--accent:#22c55e;--accent-2:#16a34a;--ring:#bbf7d0;--card:#f7f7f4;--shadow:0 1px 0 rgba(0,0,0,.03), 0 10px 30px rgba(0,0,0,.07);
@@ -95,7 +95,7 @@
       <section class="hero">
         <div>
           <div class="title">想不到要吃什麼嗎？</div>
-          <div class="subtitle">按一下馬上給你 <b>200 道蔬食食譜</b> 的靈感 ✨（全素/蛋奶素可選）</div>
+          <div class="subtitle">按一下馬上給你 <b>200 道蔬食食譜</b> 的靈感 ✨（全素/蛋奶素可選）｜<b>無蒜版</b></div>
         </div>
         <div class="cta">
           <button id="btn-random" class="btn">🎲 隨機推薦</button>
@@ -120,7 +120,7 @@
 
       <section id="grid" class="grid" aria-live="polite"></section>
 
-      <footer>© 2025 VeggieKitchen. 純素友善・字少易讀・好做又好吃。</footer>
+      <footer>© 2025 VeggieKitchen. 純素友善・字少易讀・好做又好吃。無蒜版本。</footer>
     </main>
   </div>
 
@@ -146,8 +146,8 @@
   </div>
 
   <script>
-  // ---------- Data generator（保留基礎調味，不優先移除） ----------
-  // 規則：1) 真實食材 2) 風味必備一定顯示 3) 不再優先移除「鹽/醬油/植物油/蒜末」。
+  // ---------- Data generator（無蒜固定版） ----------
+  // 規則：1) 真實食材 2) 風味必備一定顯示 3) 將「蒜末」全面移除並以「薑絲」替代。
   const VEG = [
     "青江菜","高麗菜","綠花椰菜","白花椰菜","菠菜","空心菜","地瓜葉","小白菜","娃娃菜",
     "四季豆","蘆筍","秋葵","紅蘿蔔","白蘿蔔","馬鈴薯","南瓜","番茄","彩椒","玉米筍",
@@ -165,7 +165,8 @@
   const CARB = ["白飯","糙米飯","藜麥飯","烏龍麵","拉麵","義大利麵","筆管麵","河粉","米粉","冬粉","年糕","吐司","玉米餅","蕎麥麵","豆腐麵"];
 
   const FLAVORS = {
-    "蒜香":"先爆香蒜末再下菜，避免焦苦。",
+    // 將「蒜香」改為「薑香」
+    "薑香":"先爆香薑絲再下菜，避免焦苦。",
     "麻油薑":"麻油最後拌入，香更足。",
     "九層塔":"起鍋前再放，保香氣。",
     "黑胡椒":"現磨最香，鹽量先少後補。",
@@ -185,6 +186,8 @@
     "青醬":"避免加熱過久以保翠綠。"
   };
   const FLAVOR_ING_MAP = {
+    // 新增薑香的關鍵食材，並確保不含蒜
+    "薑香":["薑絲"],
     "九層塔":["九層塔"],
     "番茄羅勒":["番茄","羅勒"],
     "青醬":["青醬"],
@@ -201,12 +204,13 @@
     "糖醋":["白醋","糖"]
   };
   const FLAVOR_BY_TYPE = {
-    "快炒":["蒜香","九層塔","黑胡椒","三杯","宮保(素)","豆豉","麻辣","鹽麴","糖醋"],
+    // 將所有出現「蒜香」的地方改為「薑香」
+    "快炒":["薑香","九層塔","黑胡椒","三杯","宮保(素)","豆豉","麻辣","鹽麴","糖醋"],
     "湯品":["味噌","清燉","番茄羅勒","咖哩"],
     "沙拉":["胡麻","檸檬胡椒","涼拌"],
     "飯麵":["咖哩","番茄羅勒","青醬","黑胡椒","胡麻"],
     "烤焗":["黑胡椒","檸檬胡椒","青醬","番茄羅勒","咖哩","鹽麴"],
-    "小食":["蒜香","胡麻","糖醋","黑胡椒","鹽麴"]
+    "小食":["薑香","胡麻","糖醋","黑胡椒","鹽麴"]
   };
   const TYPES = ["快炒","湯品","沙拉","飯麵","烤焗","小食"];
   const TYPE_NOTES = {
@@ -221,12 +225,12 @@
   const pick = (arr)=> arr[Math.floor(Math.random()*arr.length)];
   const rr = (min,max)=> Math.floor(Math.random()*(max-min+1))+min;
 
-  // 不優先移除基礎調味：將必備與基礎調味放在前面，最後才放次要食材，超過 8 個直接截斷。
+  // 基礎調味：改為無蒜，使用薑絲
   function packIngredients({flName,v1,v2,p,c}){
     const essentials = FLAVOR_ING_MAP[flName]||[];
-    const basics = ["蒜末","醬油","鹽","植物油"];
+    const basics = ["薑絲","醬油","鹽","植物油"]; // ⬅️ 這裡原本是含「蒜末」，已改為「薑絲」
     const ordered = [...new Set([ ...essentials, ...basics, v1, p, c, v2 ].filter(Boolean))];
-    // 特例：確保番茄羅勒/九層塔關鍵詞存在
+    // 特例：關鍵詞存在性
     if(flName==="番茄羅勒" && !ordered.includes("番茄")) ordered.splice(essentials.length,0,"番茄");
     if(flName==="九層塔" && !ordered.includes("九層塔")) ordered.splice(essentials.length,0,"九層塔");
     if((flName==="黑胡椒"||flName==="檸檬胡椒") && !ordered.includes("黑胡椒")) ordered.splice(essentials.length,0,"黑胡椒");
@@ -250,10 +254,10 @@
     return {id:idSeed++, title, type, ings, note, diet:"全素", time:`${rr(t[0],t[1])} 分鐘`};
   }
 
-  // 產生 200 道不重複標題的食譜
+  // 產生 200 道不重複標題的食譜（無蒜）
   const RECIPES = (()=>{ const set=new Set(), out=[]; let guard=0; while(out.length<200 && guard<6000){ const r=makeRecipe(); if(!set.has(r.title)){ set.add(r.title); out.push(r);} guard++; } return out; })();
 
-  // ---------- Render（同前） ----------
+  // ---------- Render ----------
   const grid = document.getElementById('grid');
   const overlay = document.getElementById('overlay');
   const q = document.getElementById('q');
@@ -261,14 +265,14 @@
   let currentType = '全部';
 
   function cardTemplate(r){
-    const tags = r.ings.map(i=>`<span class=\"tag\">${i}</span>`).join('');
-    return `<article class=\"card\" data-id=\"${r.id}\" data-type=\"${r.type}\">
-      <span class=\"badge\">${r.type}</span>
+    const tags = r.ings.map(i=>`<span class="tag">${i}</span>`).join('');
+    return `<article class="card" data-id="${r.id}" data-type="${r.type}">
+      <span class="badge">${r.type}</span>
       <h3>${r.title}</h3>
-      <div class=\"meta\">${tags}</div>
-      <div class=\"note\">⚑ ${r.note}</div>
-      <div class=\"actions\">
-        <button class=\"btn ghost btn-detail\">看做法/注意</button>
+      <div class="meta">${tags}</div>
+      <div class="note">⚑ ${r.note}</div>
+      <div class="actions">
+        <button class="btn ghost btn-detail">看做法/注意</button>
       </div>
     </article>`
   }
@@ -334,7 +338,7 @@
     document.getElementById('detail-type').textContent = `${r.type}`;
     document.getElementById('level-pill').textContent = `⏱️ ${r.time}`;
     document.getElementById('diet-pill').textContent = r.diet==='全素'? '🥗 全素可' : '🥚 蛋奶素';
-    document.getElementById('ing').innerHTML = r.ings.map(i=>`<div class=\"pill\">🛒 ${i}</div>`).join('');
+    document.getElementById('ing').innerHTML = r.ings.map(i=>`<div class="pill">🛒 ${i}</div>`).join('');
     document.getElementById('note').textContent = r.note;
     overlay.classList.add('show');
     overlay.setAttribute('aria-hidden','false');
